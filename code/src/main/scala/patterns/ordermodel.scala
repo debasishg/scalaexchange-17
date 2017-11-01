@@ -14,7 +14,7 @@ trait OrderModel {this: RefModel =>
 
   type ClientOrder = Map[String, String]
 
-  private def makeOrder(clientOrder: ClientOrder): Either[DomainValidation, Order] = try {
+  def makeOrder(clientOrder: ClientOrder): Either[DomainValidation, Order] = try {
     val instruments = clientOrder("instrument").split("-")
     val lineItems = instruments map makeLineItem
     Either.right(Order(clientOrder("no"), today, clientOrder("customer"), lineItems.toList))

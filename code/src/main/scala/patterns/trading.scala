@@ -89,16 +89,14 @@ trait TradingC[Account, Trade, ClientOrder, Order, Execution, Market] {
  */  
 trait TradingD[F[_], Account, Trade, ClientOrder, Order, Execution, Market] {
 
-  type Result[B, C] = Kleisli[EitherT[F, DomainValidation, ?], B, C]
-  
-  def fromClientOrder: Result[ClientOrder, Order]
-  def execute(market: Market, brokerAccount: Account): Result[Order, List[Execution]]
-  def allocate(accounts: List[Account]): Result[List[Execution], List[Trade]]
+  def fromClientOrder: Kleisli[EitherT[F, DomainValidation, ?], ClientOrder, Order]
+  def execute(market: Market, brokerAccount: Account): Kleisli[EitherT[F, DomainValidation, ?], Order, List[Execution]]
+  def allocate(accounts: List[Account]): Kleisli[EitherT[F, DomainValidation, ?], List[Execution], List[Trade]]
 
   def tradeGeneration(
     market: Market, 
     broker: Account, 
-    clientAccounts: List[Account])(implicit F: Monad[F]): Result[ClientOrder, List[Trade]] = 
+    clientAccounts: List[Account])(implicit F: Monad[F]): Kleisli[EitherT[F, DomainValidation, ?], ClientOrder, List[Trade]] =
     fromClientOrder andThen execute(market, broker) andThen allocate(clientAccounts)
 }
 

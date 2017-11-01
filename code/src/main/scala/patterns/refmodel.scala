@@ -1,7 +1,5 @@
 package patterns
 
-import java.util.{ Calendar, Date }
-
 trait RefModel {
   type Instrument = String
   type Account = String
@@ -23,5 +21,4 @@ trait RefModel {
     case "Tokyo" => Tokyo
     case _ => Other
   }
-  def today() = Calendar.getInstance.getTime
 }
