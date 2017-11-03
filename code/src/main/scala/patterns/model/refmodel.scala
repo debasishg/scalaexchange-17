@@ -1,4 +1,5 @@
 package patterns
+package model
 
 trait RefModel {
   type Instrument = String

@@ -3,6 +3,7 @@ val catsEffectVersion = "0.4"
 val configVersion = "1.3.1"
 
 val catsCore = "org.typelevel" % "cats-core_2.12" % catsVersion
+val catsFree = "org.typelevel" % "cats-free_2.12" % catsVersion
 val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
 
 val macroParadise = compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
@@ -26,7 +27,7 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.12.3",
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
   libraryDependencies ++= Seq(
-      catsCore, catsEffect,
+      catsCore, catsEffect, catsFree,
       specs2Core % Test, specs2Scalacheck % Test, scalacheck % Test,
       macroParadise, kindProjector,
       typesafeConfig

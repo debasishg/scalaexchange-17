@@ -1,4 +1,5 @@
 package patterns
+package model
 
 import java.util.Date
 

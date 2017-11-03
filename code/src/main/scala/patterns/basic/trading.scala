@@ -1,4 +1,5 @@
 package patterns
+package basic
 
 import cats._
 import cats.data._
@@ -7,6 +8,8 @@ import cats.effect.IO
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
+import model._
 
 /**
  *  Plain monadic disjunction

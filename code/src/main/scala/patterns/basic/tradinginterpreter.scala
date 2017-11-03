@@ -1,4 +1,5 @@
 package patterns
+package basic
 
 import java.util.{ Date, Calendar }
 
@@ -7,6 +8,7 @@ import cats.data._
 import cats.implicits._
 import cats.effect.IO
 
+import model._
 import TradeModel._
 
 trait TradingInterpreter extends TradingD[IO, Account, Trade, ClientOrder, Order, Execution, Market] {
