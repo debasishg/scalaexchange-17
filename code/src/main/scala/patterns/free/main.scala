@@ -33,3 +33,4 @@ object Main {
   val ioTrades: IO[List[Trade]] = new TradingIOInterpreter().apply(tradeGen(cor))
   ioTrades.unsafeRunSync()
 }
+
