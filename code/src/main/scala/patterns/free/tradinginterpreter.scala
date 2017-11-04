@@ -4,17 +4,17 @@ package free
 import cats.{ Order => OrderZ, _ }
 import cats.data._
 import cats.implicits._
-import cats.effect.IO
+import cats.effect.{ Effect, IO }
 
 import model._
 import TradeModel._
 
 
-trait TradingInterpreter {
-  def apply[A](action: Trading[A]): IO[A]
+abstract class TradingInterpreter[F[_]](implicit E: Effect[F]) {
+  def apply[A](action: Trading[A]): F[A]
 }
   
-case class TradingIOInterpreter() extends TradingInterpreter {
+class TradingIOInterpreter() extends TradingInterpreter[IO] {
 
   val step: TradingF ~> IO = new (TradingF ~> IO) {
 
@@ -43,5 +43,3 @@ case class TradingIOInterpreter() extends TradingInterpreter {
 
   def apply[A](action: Trading[A]): IO[A] = action.foldMap(step)
 }
-
-object TradingIOInterpreter extends TradingIOInterpreter
