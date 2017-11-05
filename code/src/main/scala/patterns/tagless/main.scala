@@ -28,11 +28,20 @@ object Main {
   )
 
   object TradingComponent extends TradingInterpreter[IO]
+  object LoggingComponent extends LoggingInterpreter[IO]
+
   import TradingComponent._
+  import LoggingComponent._
 
-  val tradeGen: Kleisli[IO, ClientOrder, List[Trade]] = tradeGeneration(m1, ba, List(ca1, ca2, ca3))
+  val ioTrades: IO[List[Trade]] = for {
+    _           <- info("Starting trading")
+    order       <- fromClientOrder(cor) 
+    _           <- info(s"Got order $order")
+    executions  <- execute(m1, ba, order) 
+    trades      <- allocate(List(ca1, ca2, ca3), executions)
+    _           <- info(s"Got trade $trades")
+  } yield trades
 
-  val ioTrades: IO[List[Trade]] = tradeGen(cor)
   ioTrades.unsafeRunSync()
 }
 
