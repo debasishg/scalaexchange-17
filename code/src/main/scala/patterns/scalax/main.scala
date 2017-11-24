@@ -27,16 +27,27 @@ object Main {
     "instrument" -> "ibm/100/1000-google/200/2000"
   )
 
-  object TradingComponent extends TradingInterpreter[IO]
+  {
+    object TradingComponent extends TradingInterpreter[IO]
+  
+    import TradingComponent._
+  
+    val ioTrades: IO[List[Trade]] = for {
+      order       <- fromClientOrder(cor) 
+      executions  <- execute(m1, ba)(order) 
+      trades      <- allocate(List(ca1, ca2, ca3))(executions)
+    } yield trades
+  
+    ioTrades.unsafeRunSync()
+  }
 
-  import TradingComponent._
+  {
+    object TradingComponentK extends TradingInterpreterK[IO]
 
-  val ioTrades: IO[List[Trade]] = for {
-    order       <- fromClientOrder(cor) 
-    executions  <- execute(m1, ba)(order) 
-    trades      <- allocate(List(ca1, ca2, ca3))(executions)
-  } yield trades
+    import TradingComponentK._
 
-  ioTrades.unsafeRunSync()
+    val kTrades: Kleisli[IO, ClientOrder, List[Trade]] = fromClientOrder andThen execute(m2, ba) andThen allocate(List(ca1, ca2, ca3))
+    kTrades(cor).unsafeRunSync()
+  }
 }
 
