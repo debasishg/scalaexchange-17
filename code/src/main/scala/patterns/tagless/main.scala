@@ -27,7 +27,14 @@ object Main {
     "instrument" -> "ibm/100/1000-google/200/2000"
   )
 
-  def tradeGeneration[F[_]](T: Trading[F], L: Logging[F])(implicit me: MonadError[F, Throwable]) = for {
+  // def tradeGeneration[M[_]: FlatMap, F[_]](T: Trading[M])(implicit P: Parallel[M, F]) = for {
+  def tradeGeneration[M[_]: FlatMap](T: Trading[M]) = for {
+    order       <- T.fromClientOrder(cor) 
+    executions  <- T.execute(m1, ba)(order) 
+    trades      <- T.allocate(List(ca1, ca2, ca3))(executions)
+  } yield trades
+
+  def tradeGenerationAudited[F[_]: FlatMap](T: Trading[F], L: Logging[F]) = for {
     _           <- L.info("starting order processing")
     order       <- T.fromClientOrder(cor) 
     executions  <- T.execute(m1, ba)(order) 
@@ -38,6 +45,7 @@ object Main {
   object TradingComponent extends TradingInterpreter[IO]
   object LoggingComponent extends LoggingInterpreter[IO]
 
-  tradeGeneration(TradingComponent, LoggingComponent).unsafeRunSync
+  tradeGeneration(TradingComponent).unsafeRunSync
+  tradeGenerationAudited(TradingComponent, LoggingComponent).unsafeRunSync
 }
 

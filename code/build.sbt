@@ -1,5 +1,5 @@
-val catsVersion = "1.0.0-MF"
-val catsEffectVersion = "0.4"
+val catsVersion = "1.0.0-RC1"
+val catsEffectVersion = "0.5"
 val configVersion = "1.3.1"
 
 val catsCore = "org.typelevel" % "cats-core_2.12" % catsVersion
@@ -24,7 +24,7 @@ lazy val commonSettings = Seq(
     , Resolver.sonatypeRepo("releases")
     , Resolver.sonatypeRepo("snapshots")
   ),
-  scalaVersion := "2.12.3",
+  scalaVersion := "2.12.4",
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
   libraryDependencies ++= Seq(
       catsCore, catsEffect, catsFree,
