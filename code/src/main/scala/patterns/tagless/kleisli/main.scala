@@ -1,5 +1,5 @@
 package patterns
-package tagless
+package tagless.kleisli
 
 import cats.{ Order => OrderZ, _ }
 import cats.data._
@@ -27,17 +27,13 @@ object Main {
     "instrument" -> "ibm/100/1000-google/200/2000"
   )
 
-  def tradeGeneration[F[_]](T: Trading[F], L: Logging[F])(implicit me: MonadError[F, Throwable]) = for {
-    _           <- L.info("starting order processing")
-    order       <- T.fromClientOrder(cor) 
-    executions  <- T.execute(m1, ba)(order) 
-    trades      <- T.allocate(List(ca1, ca2, ca3))(executions)
-    _           <- L.info("allocation done")
-  } yield trades
-
   object TradingComponent extends TradingInterpreter[IO]
-  object LoggingComponent extends LoggingInterpreter[IO]
 
-  tradeGeneration(TradingComponent, LoggingComponent).unsafeRunSync
+  def tradeGeneration[F[_]](T: Trading[F])
+    (implicit me: MonadError[F, Throwable]): Kleisli[F, ClientOrder, List[Trade]] = 
+      T.fromClientOrder andThen T.execute(m2, ba) andThen T.allocate(List(ca1, ca2, ca3))
+
+  val tk = tradeGeneration(TradingComponent)
+  tk(cor).unsafeRunSync
 }
 

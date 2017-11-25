@@ -13,6 +13,3 @@ class LoggingInterpreter[F[_]](implicit me: MonadError[F, Throwable]) extends Lo
   def error(msg: String): F[Unit] =
     { println(s"Error: $msg") }.pure[F]
 }
-
-
-
