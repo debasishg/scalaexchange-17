@@ -9,7 +9,7 @@ import cats.effect.IO
 import model._
 import TradeModel._
 
-object Main {
+trait Data {
 
   val m1 = makeMarket("Tokyo")
   val m2 = makeMarket("NewYork")
@@ -26,26 +26,58 @@ object Main {
     "customer" -> "customer-1",
     "instrument" -> "ibm/100/1000-google/200/2000"
   )
+}
 
-  // def tradeGeneration[M[_]: FlatMap, F[_]](T: Trading[M])(implicit P: Parallel[M, F]) = for {
+object TradeGenerationIO extends Data {
   def tradeGeneration[M[_]: FlatMap](T: Trading[M]) = for {
     order       <- T.fromClientOrder(cor) 
-    executions  <- T.execute(m1, ba)(order) 
-    trades      <- T.allocate(List(ca1, ca2, ca3))(executions)
+    executions  <- T.execute(m1, ba, order) 
+    trades      <- T.allocate(List(ca1, ca2, ca3), executions)
   } yield trades
 
-  def tradeGenerationAudited[F[_]: FlatMap](T: Trading[F], L: Logging[F]) = for {
+  object TradingComponent extends TradingInterpreter[IO]
+  tradeGeneration(TradingComponent).unsafeRunSync
+}
+
+object TradeGenerationMonix extends Data {
+  import monix.eval.Task
+
+  def tradeGeneration[M[_]: FlatMap](T: Trading[M]) = for {
+    order       <- T.fromClientOrder(cor) 
+    executions  <- T.execute(m1, ba, order) 
+    trades      <- T.allocate(List(ca1, ca2, ca3), executions)
+  } yield trades
+
+  object TradingComponent extends TradingInterpreter[Task]
+  tradeGeneration(TradingComponent)
+}
+
+object TradeGenerationLoggable extends Data {
+  def tradeGenerationLoggable[F[_]: FlatMap](T: Trading[F], L: Logging[F]) = for {
     _           <- L.info("starting order processing")
     order       <- T.fromClientOrder(cor) 
-    executions  <- T.execute(m1, ba)(order) 
-    trades      <- T.allocate(List(ca1, ca2, ca3))(executions)
+    executions  <- T.execute(m1, ba, order) 
+    trades      <- T.allocate(List(ca1, ca2, ca3), executions)
     _           <- L.info("allocation done")
   } yield trades
 
   object TradingComponent extends TradingInterpreter[IO]
   object LoggingComponent extends LoggingInterpreter[IO]
 
-  tradeGeneration(TradingComponent).unsafeRunSync
-  tradeGenerationAudited(TradingComponent, LoggingComponent).unsafeRunSync
+  tradeGenerationLoggable(TradingComponent, LoggingComponent).unsafeRunSync
+}
+
+object TradeGenerationAuditable extends Data {
+  import scala.concurrent.Future
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  def tradeGenerationAuditable[F[_]: FlatMap](T: AuditableTrading[F]) = for {
+    order       <- T.fromClientOrder(cor) 
+    executions  <- T.execute(m1, ba, order) 
+    trades      <- T.allocate(List(ca1, ca2, ca3), executions)
+  } yield trades
+
+  object TradingComponentF extends TradingInterpreter[Future]
+  tradeGenerationAuditable(new AuditableTrading[Future](TradingComponentF))
 }
 

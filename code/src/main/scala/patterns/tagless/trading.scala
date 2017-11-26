@@ -9,7 +9,7 @@ import model._
 import TradeModel._
 
 trait Trading[F[_]] {
-  def fromClientOrder: ClientOrder => F[Order]
-  def execute(market: Market, brokerAccount: Account): Order => F[List[Execution]]
-  def allocate(accounts: List[Account]): List[Execution] => F[List[Trade]]
+  def fromClientOrder(clientOrder: ClientOrder): F[Order]
+  def execute(market: Market, brokerAccount: Account, order: Order): F[List[Execution]]
+  def allocate(accounts: List[Account], executions: List[Execution]): F[List[Trade]]
 }

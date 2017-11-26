@@ -1,10 +1,13 @@
 val catsVersion = "1.0.0-RC1"
 val catsEffectVersion = "0.5"
 val configVersion = "1.3.1"
+val monixVersion = "3.0.0-M2"
 
 val catsCore = "org.typelevel" % "cats-core_2.12" % catsVersion
 val catsFree = "org.typelevel" % "cats-free_2.12" % catsVersion
 val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
+
+val monix = "io.monix" %% "monix" % monixVersion
 
 val macroParadise = compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 val kindProjector = compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4")
@@ -27,10 +30,16 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.12.4",
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
   libraryDependencies ++= Seq(
-      catsCore, catsEffect, catsFree,
-      specs2Core % Test, specs2Scalacheck % Test, scalacheck % Test,
-      macroParadise, kindProjector,
-      typesafeConfig
+      catsCore, 
+      catsEffect, 
+      catsFree,
+      specs2Core % Test, 
+      specs2Scalacheck % Test, 
+      scalacheck % Test,
+      macroParadise, 
+      kindProjector,
+      typesafeConfig, 
+      monix
     )
 )
 
