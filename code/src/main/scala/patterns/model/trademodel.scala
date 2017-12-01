@@ -10,7 +10,7 @@ import cats.implicits._
 
 trait TradeModel {this: RefModel =>
 
-  case class Trade private[patterns] (account: Account, instrument: Instrument, refNo: String, market: Market,
+  case class Trade private[patterns] (account: AccountNo, instrument: Instrument, refNo: String, market: Market,
     unitPrice: BigDecimal, quantity: BigDecimal, tradeDate: Date = today,
     valueDate: Option[Date] = None, taxFees: Option[List[(TaxFeeId, BigDecimal)]] = None, 
     netAmount: Option[BigDecimal] = None)
@@ -46,7 +46,7 @@ trait TradeModel {this: RefModel =>
     tids zip (tids map valueAs(t))
   }
 
-  def makeTrade(account: Account, 
+  def makeTrade(account: AccountNo, 
     instrument: Instrument, 
     refNo: String, 
     market: Market, 

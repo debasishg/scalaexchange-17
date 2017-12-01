@@ -29,55 +29,66 @@ trait Data {
 }
 
 object TradeGenerationIO extends Data {
-  def tradeGeneration[M[_]: FlatMap](T: Trading[M]) = for {
-    order       <- T.fromClientOrder(cor) 
-    executions  <- T.execute(m1, ba, order) 
-    trades      <- T.allocate(List(ca1, ca2, ca3), executions)
+  def tradeGeneration[M[_]: Monad](T: Trading[M], A: AccountRepository[M])(implicit me: MonadError[M, Throwable]) = for {
+    order                 <- T.fromClientOrder(cor) 
+    maybeBrokerAccount    <- A.fromNo(ba)
+    executions            <- maybeBrokerAccount.map(b => T.execute(m1, b, order))
+                                               .getOrElse(me.raiseError(new Exception(s"Invalid account number $ba")))
+    trades                <- T.allocate(List(ca1, ca2, ca3), executions)
   } yield trades
 
   object TradingComponent extends TradingInterpreter[IO]
-  tradeGeneration(TradingComponent).unsafeRunSync
+  object AccountRepositoryComponent extends AccountRepositoryInterpreter[IO]
+  tradeGeneration(TradingComponent, AccountRepositoryComponent).unsafeRunSync
 }
 
 object TradeGenerationMonix extends Data {
   import monix.eval.Task
 
-  def tradeGeneration[M[_]: FlatMap](T: Trading[M]) = for {
-    order       <- T.fromClientOrder(cor) 
-    executions  <- T.execute(m1, ba, order) 
-    trades      <- T.allocate(List(ca1, ca2, ca3), executions)
+  def tradeGeneration[M[_]: FlatMap](T: Trading[M], A: AccountRepository[M])(implicit me: MonadError[M, Throwable]) = for {
+    order                 <- T.fromClientOrder(cor) 
+    maybeBrokerAccount    <- A.fromNo(ba)
+    executions            <- maybeBrokerAccount.map(b => T.execute(m1, b, order))
+                                               .getOrElse(me.raiseError(new Exception(s"Invalid account number $ba")))
+    trades                <- T.allocate(List(ca1, ca2, ca3), executions)
   } yield trades
 
   object TradingComponent extends TradingInterpreter[Task]
-  tradeGeneration(TradingComponent)
+  object AccountRepositoryComponent extends AccountRepositoryInterpreter[Task]
+  tradeGeneration(TradingComponent, AccountRepositoryComponent)
 }
 
 object TradeGenerationLoggable extends Data {
-  def tradeGenerationLoggable[F[_]: FlatMap](T: Trading[F], L: Logging[F]) = for {
-    _           <- L.info("starting order processing")
-    order       <- T.fromClientOrder(cor) 
-    executions  <- T.execute(m1, ba, order) 
-    trades      <- T.allocate(List(ca1, ca2, ca3), executions)
-    _           <- L.info("allocation done")
+  def tradeGenerationLoggable[F[_]: FlatMap](T: Trading[F], L: Logging[F], A: AccountRepository[F])(implicit me: MonadError[F, Throwable]) = for {
+    _                     <- L.info("starting order processing")
+    order                 <- T.fromClientOrder(cor) 
+    maybeBrokerAccount    <- A.fromNo(ba)
+    executions            <- maybeBrokerAccount.map(b => T.execute(m1, b, order))
+                                               .getOrElse(me.raiseError(new Exception(s"Invalid account number $ba")))
+    trades                <- T.allocate(List(ca1, ca2, ca3), executions)
+    _                     <- L.info("allocation done")
   } yield trades
 
   object TradingComponent extends TradingInterpreter[IO]
   object LoggingComponent extends LoggingInterpreter[IO]
+  object AccountRepositoryComponent extends AccountRepositoryInterpreter[IO]
 
-  tradeGenerationLoggable(TradingComponent, LoggingComponent).unsafeRunSync
+  tradeGenerationLoggable(TradingComponent, LoggingComponent, AccountRepositoryComponent).unsafeRunSync
 }
 
+/*
 object TradeGenerationAuditable extends Data {
   import scala.concurrent.Future
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def tradeGenerationAuditable[F[_]: FlatMap](T: AuditableTrading[F]) = for {
+  def tradeGenerationAuditable[F[_]: FlatMap](T: AuditableTrading[F], A: AccountRepository[M]) = for {
     order       <- T.fromClientOrder(cor) 
-    executions  <- T.execute(m1, ba, order) 
+    executions  <- T.execute(m1, ba, order, A) 
     trades      <- T.allocate(List(ca1, ca2, ca3), executions)
   } yield trades
 
   object TradingComponentF extends TradingInterpreter[Future]
   tradeGenerationAuditable(new AuditableTrading[Future](TradingComponentF))
 }
+*/
 

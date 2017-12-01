@@ -3,7 +3,7 @@ package model
 
 trait RefModel {
   type Instrument = String
-  type Account = String
+  type AccountNo = String
   type NetAmount = BigDecimal
   type Customer = String
   type Broker = String
@@ -22,4 +22,6 @@ trait RefModel {
     case "Tokyo" => Tokyo
     case _ => Other
   }
+
+  case class Account(accountNo: AccountNo, name: String, isActive: Boolean)
 }

@@ -29,6 +29,7 @@ object Main {
     )
   }
 
+  /*
   object TradeGenerationIO extends Data {
     def tradeGeneration[M[_]: FlatMap](T: Trading[M]): Kleisli[M, ClientOrder, List[Trade]] = 
       T.fromClientOrder andThen T.execute(m1, ba) andThen T.allocate(List(ca1, ca2, ca3))
@@ -38,4 +39,5 @@ object Main {
 
     tk(cor).unsafeRunSync
   }
+  */
 }

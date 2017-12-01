@@ -20,7 +20,7 @@ class TradingInterpreter[F[_]](implicit me: MonadError[F, Throwable])
     Execution(brokerAccount, item.ins, "e-123", market, item.price, item.qty)
   }.pure[F] }
 
-  def allocate(accounts: List[Account]) = Kleisli[F, List[Execution], List[Trade]] { _.map { execution =>
+  def allocate(accounts: List[AccountNo]) = Kleisli[F, List[Execution], List[Trade]] { _.map { execution =>
     val q = execution.quantity / accounts.size
     accounts.map { account =>
       makeTrade(account, execution.instrument, "t-123", execution.market, execution.unitPrice, q)
