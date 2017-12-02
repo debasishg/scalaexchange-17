@@ -29,17 +29,17 @@ trait Data {
 }
 
 object TradeGenerationIO extends Data {
-  def tradeGeneration[M[_]: Monad](T: Trading[M], A: AccountRepository[M])(implicit me: MonadError[M, Throwable]) = for {
+  def tradeGeneration[M[_]: Monad](T: Trading[M], A: AccountRepository[M], brokerAccountNo: String)(implicit me: MonadError[M, Throwable]) = for {
     order                 <- T.fromClientOrder(cor) 
-    maybeBrokerAccount    <- A.fromNo(ba)
+    maybeBrokerAccount    <- A.fromNo(brokerAccountNo)
     executions            <- maybeBrokerAccount.map(b => T.execute(m1, b, order))
-                                               .getOrElse(me.raiseError(new Exception(s"Invalid account number $ba")))
+                                               .getOrElse(me.raiseError(new Exception(s"Invalid account number $brokerAccountNo")))
     trades                <- T.allocate(List(ca1, ca2, ca3), executions)
   } yield trades
 
   object TradingComponent extends TradingInterpreter[IO]
   object AccountRepositoryComponent extends AccountRepositoryInterpreter[IO]
-  tradeGeneration(TradingComponent, AccountRepositoryComponent).unsafeRunSync
+  tradeGeneration(TradingComponent, AccountRepositoryComponent, ba).unsafeRunSync
 }
 
 object TradeGenerationMonix extends Data {
