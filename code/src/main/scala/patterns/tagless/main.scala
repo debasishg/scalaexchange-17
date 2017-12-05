@@ -39,6 +39,19 @@ object TradeGenerationIO extends Data {
   tradeGeneration(TradingComponent).unsafeRunSync
 }
 
+object TradeGenerationTry extends Data {
+  import scala.util.Try
+
+  def tradeGeneration[M[_]: FlatMap](T: Trading[M]) = for {
+    order       <- T.fromClientOrder(cor) 
+    executions  <- T.execute(m1, ba, order) 
+    trades      <- T.allocate(List(ca1, ca2, ca3), executions)
+  } yield trades
+
+  object TradingComponent extends TradingInterpreter[Try]
+  tradeGeneration(TradingComponent)
+}
+
 object TradeGenerationMonix extends Data {
   import monix.eval.Task
 
